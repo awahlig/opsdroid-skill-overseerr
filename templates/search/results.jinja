@@ -1,0 +1,15 @@
+{% import "helpers.jinja" as helpers %}
+{% if results %}
+{% if skip > 0 %}
+Here's some more results for "{{ term }}", which one did you mean?
+{% else %}
+Here's what I found for "{{ term }}", which one did you mean?
+{% endif %}
+{% for result in results %}
+{{ result.index }}. {{ helpers.info_title(result.mediaType, result) }}
+{%- if result.mediaInfo and result.mediaInfo.status == MediaStatus.AVAILABLE %} {{ "\u2705" }}{% endif +%}
+{% endfor %}
+Showing {{ results|length + skip }} of {{ total }} results{% if results|length + skip < total %} (you can say «more»){% endif %}
+{% else %}
+Nothing found for "{{ term }}", sorry
+{% endif %}

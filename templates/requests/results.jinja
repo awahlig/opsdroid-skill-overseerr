@@ -1,0 +1,21 @@
+{% import "helpers.jinja" as helpers %}
+{% if results %}
+Here are some {{ "more" if skip > 0 else "recent" }}{{ "" if kind == "all" else " " + kind }} requests, which one would you like to see?
+{% for result in results %}
+{% if result.media.status == MediaStatus.PENDING %}
+{{ "\u2753" }}
+{%- elif result.media.status == MediaStatus.PROCESSING %}
+{% if result.media.downloadStatus %}{{ "\u2b07" }}{% else %}{{ "\U0001f50d" }}{% endif %}
+{%- elif result.media.status == MediaStatus.PARTIALLY_AVAILABLE %}
+{{ "\u274e" }}
+{%- elif result.media.status == MediaStatus.AVAILABLE %}
+{{ "\u2705" }}
+{%- else %}
+{{ "\u274c" }}
+{%- endif %}
+ {{ result.index }}. {{ helpers.info_title(result.media.mediaType, result.info) }}
+{% endfor %}
+Showing {{ results|length + skip }} of {{ total }} results{% if results|length + skip < total %} (you can say «more»){% endif %}
+{% else %}
+No{{ " more" if skip > 0 else "" }}{{ "" if kind == "all" else " " + kind }} requests found, sorry
+{% endif %}

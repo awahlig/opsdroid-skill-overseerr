@@ -1,0 +1,22 @@
+{# subject is the movie title with year #}
+{# media_type is 'movie' or 'tv' #}
+{# notification_type can be
+  MEDIA_PENDING (new request),
+  MEDIA_DECLINED, MEDIA_APPROVED,
+  MEDIA_AVAILABLE (completed)
+#}
+{% if notification_type == "MEDIA_PENDING" %}
+New {{ media.media_type }} request from {{ request.requestedBy_username }}:
+{{ subject }}
+――――
+Type "/r pending" here to approve, decline, or edit this request
+{% if api %}or go to {{ api.make_abs_url("/requests") }}{% endif %}
+{% elif notification_type == "MEDIA_DECLINED" -%}
+  Request for {{ subject }} declined
+{% elif notification_type == "MEDIA_APPROVED" -%}
+  Request for {{ subject }} approved
+{% elif notification_type == "MEDIA_AVAILABLE" -%}
+  {{ subject }} is now ready to watch
+{% elif notification_type == "TEST_NOTIFICATION" -%}
+  {{ message }}
+{% endif %}

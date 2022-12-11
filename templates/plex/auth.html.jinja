@@ -1,0 +1,7 @@
+{% extends "plex/base.html.jinja" %}
+
+{% block content %}
+<p>Success! User <strong>{{ headers["X-Plex-Version"] }}</strong> has been authorized
+to access your Plex account.</p>
+<p>You can close this window now.</p>
+{% endblock %}

@@ -1,0 +1,4 @@
+Which root folder should I download into?
+{% for folder in rootFolders %}
+{{ folder.id }}. {{ folder.path }} ({{ folder.freeSpace | filesizeformat }})
+{% endfor %}

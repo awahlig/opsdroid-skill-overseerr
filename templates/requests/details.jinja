@@ -1,0 +1,25 @@
+{% import "helpers.jinja" as helpers %}
+{{ helpers.info_title(result.media.mediaType, result.info) }} —
+{%- if result.media.status == MediaStatus.PENDING %}
+ Pending {{ "\u2753" }}
+{% elif result.media.status == MediaStatus.PROCESSING %}
+{% if result.media.downloadStatus %}
+ Downloading {{ "\u2b07" }}
+{% for download in result.media.downloadStatus %}
+{% set percentage = (download.size - download.sizeLeft) * 100 / download.size %}
+{{ "{:.1f}".format(percentage) }}% done{% if download.timeLeft %} ({{ download.timeLeft }} left){% endif +%}
+{% endfor %}
+{% else %}
+ Requested {{ "\U0001f50d" }}
+{% endif %}
+{% elif result.media.status == MediaStatus.PARTIALLY_AVAILABLE %}
+ Partially Available {{ "\u274e" }}
+{% elif result.media.status == MediaStatus.AVAILABLE %}
+ Available {{ "\u2705" }}
+{% else %}
+ Unknown
+{% endif %}
+Added {{ format_time_ago(parse_time(result.createdAt)) }} by {{ result.requestedBy.displayName }}
+――――
+{{ result.info.overview }}
+{{ api.make_abs_url("/{}/{}".format(result.media.mediaType, result.media.tmdbId)) }}

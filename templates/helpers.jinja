@@ -1,0 +1,11 @@
+{% macro info_title(media_type, info) %}
+{% if media_type == "movie" %}
+{{ info.title }}{% if info.releaseDate %} ({{ info.releaseDate[:4] }}){% endif %}
+{% elif media_type == "tv" %}
+{{ info.name }} (TV{{ " " + info.firstAirDate[:4] if info.firstAirDate else "" }})
+{%- elif media_type == "person" %}
+{{ info.name }} (person)
+{%- else %}
+{{ media_type }}
+{%- endif %}
+{% endmacro %}
