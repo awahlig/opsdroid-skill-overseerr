@@ -111,8 +111,12 @@ async def request_flow(message, context, selected, params):
         folder = ""
 
     # Abort if media already requested.
-    status = selected.get("mediaInfo", {}).get("status", MediaStatus.UNKNOWN)
-    if status != MediaStatus.UNKNOWN:
+    print(selected)
+    status = selected.get("mediaInfo", {}) \
+                     .get("status", MediaStatus.UNKNOWN)
+    if status in (MediaStatus.PENDING,
+                  MediaStatus.PROCESSING,
+                  MediaStatus.AVAILABLE):
         text = "This media has already been requested, bye"
         await message.respond(Message(text))
         return
