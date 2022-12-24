@@ -118,9 +118,11 @@ class OverseerrSession:
         return await self.delete(f"/request/{request_id}")
 
     async def request(self, media_type, media_id,
-                      server_id=None, profile_id=None, root_folder=None):
+                      server_id=None, profile_id=None,
+                      root_folder=None, seasons="all"):
         data = {"mediaType": media_type,
-                "mediaId": media_id}
+                "mediaId": media_id,
+                "seasons": seasons}
         if server_id is not None:
             data["serverId"] = server_id
         if profile_id is not None:
