@@ -146,5 +146,16 @@ class OverseerrSession:
             return await self.get_tv(media["tmdbId"])
         return {}
 
-    async def get_radarr_info(self, server_id=0):
+    ### Service
+
+    async def get_radarr(self):
+        return await self.get(f"/service/radarr")
+
+    async def get_radarr_server(self, server_id):
         return await self.get(f"/service/radarr/{server_id}")
+
+    async def get_sonarr(self):
+        return await self.get(f"/service/sonarr")
+
+    async def get_sonarr_server(self, server_id):
+        return await self.get(f"/service/sonarr/{server_id}")

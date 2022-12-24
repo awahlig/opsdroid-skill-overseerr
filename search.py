@@ -117,7 +117,11 @@ async def request_flow(message, context, selected, params):
         await message.respond(Message(text))
         return
 
-    server_info = await context.session.get_radarr_info()
+    # Get server info depending on media type.
+    if selected["mediaType"] == "tv":
+        server_info = await context.session.get_sonarr_server(0)
+    else:
+        server_info = await context.session.get_radarr_server(0)
 
     # If provided in params, match the quality with profile names.
     profile = None
@@ -160,7 +164,10 @@ async def request_flow(message, context, selected, params):
     # Finally, request the media!
     await message.respond(Typing(True))
     data = await context.session.request(
-        selected["mediaType"], selected["id"], profile_id=profile["id"],
+        selected["mediaType"],
+        selected["id"],
+        server_id=0,
+        profile_id=profile["id"],
         root_folder=root_folder["path"])
 
     tmpl = context.jinja.get_template("request/done.jinja")
