@@ -12,6 +12,31 @@ class MediaStatus(IntEnum):
     AVAILABLE = 5
 
 
+class OverseerrError(Exception):
+    def __init__(self, status, reason, message, errors):
+        super().__init__(message or reason)
+        self.status = status
+        self.reason = reason
+        self.message = message
+        self.errors = errors
+
+    def __str__(self):
+        return f"OverseerrError({self.status!r}, {self.reason!r}, " \
+            f"{self.message!r}, {self.errors!r})"
+
+
+async def raise_for_status(resp):
+    if resp.status < 400:
+        return
+    try:
+        error = await resp.json()
+    except ValueError:
+        error = {}
+    raise OverseerrError(resp.status, resp.reason,
+                         error.get("message", ""),
+                         error.get("errors", []))
+
+
 class OverseerrAPI:
     def __init__(self, url, api_key=None):
         self.parsed_url = urllib.parse.urlparse(url)
@@ -35,22 +60,24 @@ class OverseerrAPI:
 class OverseerrSession:
     def __init__(self, api):
         self.api = api
-        self.session = aiohttp.ClientSession(headers=api.headers,
-                                             raise_for_status=True)
+        self.session = aiohttp.ClientSession(headers=api.headers)
 
     async def get(self, path, query=None, qs=""):
         url = self.api.make_url(path, query, qs)
         async with self.session.get(url) as resp:
+            await raise_for_status(resp)
             return await resp.json()
 
     async def post(self, path, data=None, query=None, qs=""):
         url = self.api.make_url(path, query, qs)
         async with self.session.post(url, json=data) as resp:
+            await raise_for_status(resp)
             return await resp.json()
 
     async def delete(self, path, query=None, qs=""):
         url = self.api.make_url(path, query, qs)
         async with self.session.delete(url) as resp:
+            await raise_for_status(resp)
             return await resp.read()
 
     ### Login

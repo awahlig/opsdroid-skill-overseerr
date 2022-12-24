@@ -3,7 +3,6 @@ import asyncio
 import json
 import time
 import contextlib
-import traceback
 
 import jinja2
 import aiohttp
@@ -17,7 +16,7 @@ from opsdroid.matchers import (match_regex,
 from .config_schema import validate as validate_config
 from .search import search_flow
 from .requests import requests_flow
-from .api import OverseerrAPI, MediaStatus
+from .api import OverseerrAPI, OverseerrError, MediaStatus
 from .plex import Plex
 from .utils import parse_time, format_time_ago
 
@@ -50,18 +49,19 @@ def configure_jinja():
 async def error_responder(message):
     try:
         yield
-    except aiohttp.ClientResponseError as error:
+    except OverseerrError as error:
+        logger.error("server error: %s", error)
         if error.status == HTTP_UNAUTHORIZED:
             text = "Looks like I'm not authorized to do that on your " \
                    "behalf at the moment. Please use /login first " \
                    "(in a private chat with me)."
         else:
-            text = f"Sorry, there was an error: {error.message}"
+            text = f"Sorry, there was an error: {error.reason}"
         await message.respond(Message(text))
     except asyncio.CancelledError:
         raise
     except:
-        traceback.print_exc()
+        logging.exception("something went wrong")
         text = "Something went wrong, sorry"
         await message.respond(Message(text))
 
