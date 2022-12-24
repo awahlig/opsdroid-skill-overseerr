@@ -132,6 +132,10 @@ async def request_flow(message, context, selected, params):
                 profile = item
                 break
 
+    # No profile and server has only one - use it.
+    if profile is None and len(server_info["profiles"]) == 1:
+        profile = server_info["profiles"][0]
+
     # Still no profile? Ask which one to use.
     if profile is None:
         tmpl = context.jinja.get_template("request/profile.jinja")
@@ -150,6 +154,10 @@ async def request_flow(message, context, selected, params):
             if folder in item["path"].lower():
                 root_folder = item
                 break
+
+    # No root folder and server has only one - use it.
+    if root_folder is None and len(server_info["rootFolders"]) == 1:
+        root_folder = server_info["rootFolders"][0]
 
     # Still no root folder path? Ask which one to use.
     if root_folder is None:
