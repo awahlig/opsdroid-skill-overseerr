@@ -31,7 +31,7 @@ def format_time_ago(dt):
 
 
 def index_parser(array, default=None):
-    async def parser(message):
+    def parser(message):
         try:
             index = int(message.text) - 1
             if index < 0:

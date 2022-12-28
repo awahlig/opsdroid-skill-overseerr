@@ -55,7 +55,7 @@ async def requests_flow(message, context):
             return
 
         result_parser = index_parser(all_results)
-        async def parser(message):
+        def parser(message):
             text = message.text
 
             if regex.match(r"m(ore)?$", text, regex.I):
@@ -75,7 +75,7 @@ async def requests_flow(message, context):
                 if regex.match(r"del(ete)?$", text, regex.I):
                     return ("delete", selected)
 
-            result = await result_parser(message)
+            result = result_parser(message)
             if result is not None:
                 return ("result", result)
 

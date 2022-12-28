@@ -1,6 +1,5 @@
 import logging
 import asyncio
-import json
 import time
 import contextlib
 
@@ -307,7 +306,7 @@ class UserContext:
         # the parser.
         for i in range(CONTEXT_MAX_REPLIES):
             message = await self.get()
-            result = await parser(message)
+            result = parser(message)
             if result is not None:
                 self.touch()
                 return result
