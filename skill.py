@@ -4,7 +4,6 @@ import time
 import contextlib
 
 import jinja2
-import aiohttp
 
 from opsdroid.skill import Skill
 from opsdroid.events import Message, Typing
@@ -129,7 +128,7 @@ class OverseerrSkill(Skill):
             if auth_token:
                 try:
                     await session.login_plex(auth_token)
-                except aiohttp.ClientResponseError:
+                except OverseerrError:
                     pass
             await func(self, message, context)
         return decorated
