@@ -3,7 +3,11 @@
 {# notification_type can be
   MEDIA_PENDING (new request),
   MEDIA_DECLINED, MEDIA_APPROVED,
-  MEDIA_AVAILABLE (completed)
+  MEDIA_AVAILABLE (completed),
+  ISSUE_CREATED, (new issue)
+  ISSUE_REOPENED,
+  ISSUE_RESOLVED,
+  ISSUE_COMMENT, 
 #}
 {% if notification_type == "MEDIA_PENDING" %}
 New {{ media.media_type }} request from {{ request.requestedBy_username }}:
@@ -17,6 +21,18 @@ Type "/r pending" here to approve, decline, or edit this request
   Request for {{ subject }} approved
 {% elif notification_type == "MEDIA_AVAILABLE" -%}
   {{ subject }} is now ready to watch
+{# even if an issue is "closed with comment", they will be separate notification events
+   issue notif will have "subject" var, which is generally the movie/tv title
+#}
+{% elif notification_type in ("ISSUE_CREATED", "ISSUE_REOPENED") -%}
+  Issue {{ issue.issue_id }} opened for {{ subject }} by {{ issue.reportedBy_username }}
+  {% if api %}{{ api.make_abs_url("/issue/") }}{{ issue.issue_id }}{% endif %}
+{% elif notification_type == "ISSUE_COMMENT" -%}
+  {{ comment.commentedBy_username }} commented on '{{ subject }}' issue:
+  {{ comment.comment_message}}
+{% elif notification_type == "ISSUE_RESOLVED" -%}
+  Issue {{ issue.issue_id }} closed for {{ subject }}
 {% elif notification_type == "TEST_NOTIFICATION" -%}
   {{ message }}
 {% endif %}
+
