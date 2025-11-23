@@ -19,8 +19,8 @@
 {% else %}
  Unknown
 {% endif %}
-Added {{ format_time_ago(parse_time(result.createdAt)) }} by {{ result.requestedBy.displayName }}
 
 {{ result.info.overview }}
 
+Added {{ format_time_ago(parse_time(result.createdAt)) }} by {{ result.requestedBy.displayName }}
 {{ api.make_abs_url("/{}/{}".format(result.media.mediaType, result.media.tmdbId)) }}
