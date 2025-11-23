@@ -64,6 +64,9 @@ class OverseerrSession:
         self.api = api
         self.session = aiohttp.ClientSession(headers=api.headers)
 
+    async def close(self):
+        await self.session.close()
+
     async def get(self, path, query=None, qs=""):
         url = self.api.make_url(path, query, qs)
         async with self.session.get(url) as resp:

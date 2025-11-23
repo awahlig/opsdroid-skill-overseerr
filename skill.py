@@ -123,7 +123,7 @@ class OverseerrSkill(Skill):
     def with_api_session(func):
         async def decorated(self, message, context):
             user_id = message.user_id
-            session = context.new_session()
+            session = await context.new_session()
             auth_token = await self.plex.get_auth_token(user_id)
             if auth_token:
                 try:
@@ -272,7 +272,9 @@ class UserContext:
     def get_age(self):
         return time.time() - self.mtime
 
-    def new_session(self):
+    async def new_session(self):
+        if self.session:
+            await self.session.close()
         self.session = self.api.new_session()
         return self.session
 
