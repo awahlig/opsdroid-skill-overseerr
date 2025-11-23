@@ -1,6 +1,7 @@
 {% import "helpers.jinja" as helpers %}
 {{ helpers.info_title(result.mediaType, result) }}
-Score: {{ result.voteAverage }} / 10 ({{ result.voteCount }} votes)
-――――
+
 {{ result.overview }}
+
+Score: {{ result.voteAverage }} / 10 ({{ result.voteCount }} votes)
 {{ api.make_abs_url("/{}/{}".format(result.mediaType, result.id)) }}
