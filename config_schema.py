@@ -1,5 +1,5 @@
-from voluptuous import (Schema, All, Any, Required, Length, Url,
-                        ALLOW_EXTRA, MultipleInvalid)
+from voluptuous import (Schema, All, Optional, Required, Length, Url,
+                        Boolean, ALLOW_EXTRA, MultipleInvalid)
 
 
 # Not using opsdroid's CONFIG_SCHEMA feature because as of opsdroid 0.28.0,
@@ -7,23 +7,31 @@ from voluptuous import (Schema, All, Any, Required, Length, Url,
 # (when room.x.url is missing, it's reporting that "room" is missing)
 
 
-str_nonempty = All(str, Length(min=1))
-schema = Schema({
-    Required("bot-name", default="opsdroid"): str_nonempty,
+STR_NONEMPTY = All(
+    str,
+    Length(min=1)
+)
+
+CONFIG_SCHEMA = Schema({
+    Required("bot-name", default="opsdroid"): STR_NONEMPTY,
     Required("bot-url"): Url(),
     Required("rooms", default={}): {
-        str_nonempty: Any(Url(), {
-            Required("url"): Url(),
-            Required("more-rooms", default=[]): [str_nonempty],
-            "api-key": str_nonempty,
-        }),
+        STR_NONEMPTY: All(
+            # For str, convert to dict first
+            lambda v: { "url": v } if isinstance(v, str) else v,
+            {
+                Required("url"): Url(),
+                Optional("more-rooms", default=[]): [STR_NONEMPTY],
+                Optional("api-key"): STR_NONEMPTY,
+                Optional("notify", default=False): Boolean(),
+            }
+        ),
     },
-    "notify-room": str_nonempty,
 }, extra=ALLOW_EXTRA)
 
 
 def validate(config):
     try:
-        return schema(config)
+        return CONFIG_SCHEMA(config)
     except MultipleInvalid as error:
         raise RuntimeError(f"skill-overseerr config validation failed: {error}")

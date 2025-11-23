@@ -14,6 +14,7 @@ from opsdroid.matchers import (match_regex,
 from .config_schema import validate as validate_config
 from .search import search_flow
 from .requests import requests_flow
+from .notify import validate_notification, send_notification
 from .api import OverseerrAPI, OverseerrError, MediaStatus
 from .plex import Plex
 from .utils import parse_time, format_time_ago
@@ -71,7 +72,6 @@ class OverseerrSkill(Skill):
         config = validate_config(self.config)
         self.bot_name = config["bot-name"]
         self.bot_url = config["bot-url"].rstrip("/")
-        self.notify_room = config.get("notify-room")
         self.jinja = configure_jinja()
         self.plex = Plex(self.bot_name, self.bot_url,
                          self.opsdroid.web_server.web_app,
@@ -82,20 +82,16 @@ class OverseerrSkill(Skill):
             self.configure_room(name, room)
 
     def configure_room(self, name, config):
-        if isinstance(config, str):
-            url = config
-            api_key = None
-            more_rooms = []
-        else:
-            url = config["url"]
-            api_key = config.get("api-key")
-            more_rooms = config["more-rooms"]
+        url = config["url"]
+        api_key = config.get("api-key")
+        more_rooms = config["more-rooms"]
+        notify = config["notify"]
 
         api = OverseerrAPI(url, api_key)
-        self.rooms[name] = RoomContext(name, self.jinja, api)
+        self.rooms[name] = RoomContext(name, self.jinja, api, notify)
 
         for name in more_rooms:
-            self.rooms[name] = RoomContext(name, self.jinja, api)
+            self.rooms[name] = RoomContext(name, self.jinja, api, notify)
 
     def get_user_context(self, event):
         room = self.rooms.get(event.target)
@@ -215,29 +211,27 @@ class OverseerrSkill(Skill):
 
     @match_webhook("notification")
     async def notification(self, request):
-        room = self.notify_room
-        if not room:
-            logger.info("received a notification but no "
-                        "notify-room is configured")
+        data = validate_notification(await request.json())
+        if not data:
             return
 
-        try:
-            api = self.rooms[room].api
-        except KeyError:
-            api = None
+        rooms = [context for context in self.rooms.values()
+                 if context.notify]
+        if not rooms:
+            logger.warning("received a notification but no room "
+                           "is configured as target")
+            return
 
-        await self.opsdroid.send(Typing(True, target=room))
-        data = await request.json()
-        tmpl = self.jinja.get_template("notify.jinja")
-        text = await tmpl.render_async(data, api=api)
-        await self.opsdroid.send(Message(text, target=room))
+        for room in rooms:
+            await send_notification(self.opsdroid, room, data)
 
 
 class RoomContext:
-    def __init__(self, name, jinja, api):
+    def __init__(self, name, jinja, api, notify):
         self.name = name
         self.jinja = jinja
         self.api = api
+        self.notify = notify
         self.user_context = {}
 
     def get_user_context(self, user_id):
