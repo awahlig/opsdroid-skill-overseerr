@@ -38,6 +38,8 @@ async def raise_for_status(resp):
 
 
 class OverseerrAPI:
+    # https://api-docs.overseerr.dev
+
     def __init__(self, url, api_key=None):
         self.parsed_url = urllib.parse.urlparse(url)
         self.headers = {}
@@ -80,7 +82,7 @@ class OverseerrSession:
             await raise_for_status(resp)
             return await resp.read()
 
-    ### Login
+    ### Auth
 
     async def login_plex(self, auth_token):
         data = {"authToken": auth_token}
@@ -131,7 +133,7 @@ class OverseerrSession:
             data["rootFolder"] = root_folder
         return await self.post("/request", data)
 
-    ### Media
+    ### Movies / TV
 
     async def get_movie(self, movie_id, language=None):
         query = dict(language=language)
@@ -140,13 +142,6 @@ class OverseerrSession:
     async def get_tv(self, tv_id, language=None):
         query = dict(language=language)
         return await self.get(f"/tv/{tv_id}", query)
-
-    async def get_info(self, media):
-        if media["mediaType"] == "movie":
-            return await self.get_movie(media["tmdbId"])
-        elif media["mediaType"] == "tv":
-            return await self.get_tv(media["tmdbId"])
-        return {}
 
     ### Service
 
