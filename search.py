@@ -27,7 +27,7 @@ async def search_flow(message, context):
             search = await context.session.search(term, page=page)
             # Filter out movies and tv shows.
             results = [r for r in search["results"]
-                        if r["mediaType"] in {"movie", "tv"}]
+                       if r["mediaType"] in {"movie", "tv"}]
 
             for index, result in enumerate(results, len(all_results) + 1):
                 result["index"] = index
