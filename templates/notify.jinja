@@ -27,7 +27,5 @@ Issue {{ issue.issue_id }} closed for {{ subject }}
   Requested by {{ request.requestedBy_username }}
 {% endif %}
 {% if media -%}
-  {{ api.make_abs_url("/"
-    ~ media.media_type ~ "/"
-    ~ media.tmdbId if media.media_type == "movie" else media.tvdbId) }}
+  {{ api.make_abs_url("/" ~ media.media_type ~ "/" ~ media.tmdbId) }}
 {% endif %}

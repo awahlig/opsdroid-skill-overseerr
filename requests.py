@@ -44,7 +44,7 @@ async def requests_flow(message, context):
                 if media["mediaType"] == "movie":
                     result["info"] = await context.session.get_movie(media["tmdbId"])
                 elif media["mediaType"] == "tv":
-                    result["info"] = await context.session.get_tv(media["tvdbId"])
+                    result["info"] = await context.session.get_tv(media["tmdbId"])
                 else:
                     result["info"] = {}
 
