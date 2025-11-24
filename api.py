@@ -1,7 +1,11 @@
+import logging
 import urllib.parse
 from enum import IntEnum
 
 import aiohttp
+
+
+logger = logging.getLogger(__name__)
 
 
 class MediaStatus(IntEnum):
@@ -69,18 +73,21 @@ class OverseerrSession:
 
     async def get(self, path, query=None, qs=""):
         url = self.api.make_url(path, query, qs)
+        logger.debug("Overseerr GET: %s", url)
         async with self.session.get(url) as resp:
             await raise_for_status(resp)
             return await resp.json()
 
     async def post(self, path, data=None, query=None, qs=""):
         url = self.api.make_url(path, query, qs)
+        logger.debug("Overseerr POST: %s", url)
         async with self.session.post(url, json=data) as resp:
             await raise_for_status(resp)
             return await resp.json()
 
     async def delete(self, path, query=None, qs=""):
         url = self.api.make_url(path, query, qs)
+        logger.debug("Overseerr DELETE: %s", url)
         async with self.session.delete(url) as resp:
             await raise_for_status(resp)
             return await resp.read()
