@@ -1,24 +1,33 @@
 {% if notification_type == "MEDIA_PENDING" %}
-{{subject }} requested by {{ request.requestedBy_username }}
+{{subject }} has been requested
 Type "/r pending" here to approve, decline, or edit this request or go to {{ api.make_abs_url("/requests") }}
 {% elif notification_type == "MEDIA_DECLINED" -%}
-  Request for {{ subject }} declined
+  Request for {{ subject }} has been declined
 {% elif notification_type == "MEDIA_APPROVED" -%}
-  Request for {{ subject }} approved
+  Request for {{ subject }} has been approved
 {% elif notification_type == "MEDIA_AVAILABLE" -%}
   {{ subject }} is now ready to watch
-{% elif notification_type in ("ISSUE_CREATED", "ISSUE_REOPENED") -%}
-  Issue {{ issue.issue_id }} opened for {{ subject }} by {{ issue.reportedBy_username }}
-  {{ api.make_abs_url("/issue/") }}{{ issue.issue_id }}
-{% elif notification_type == "ISSUE_COMMENT" -%}
-  {{ comment.commentedBy_username }} commented on '{{ subject }}' issue:
-  {{ comment.comment_message}}
-{% elif notification_type == "ISSUE_RESOLVED" -%}
-  Issue {{ issue.issue_id }} closed for {{ subject }}
+{% elif notification_type in ("ISSUE_CREATED", "ISSUE_REOPENED") %}
+Issue {{ issue.issue_id }} opened for {{ subject }} by {{ issue.reportedBy_username }}
+{{ api.make_abs_url("/issue/" ~ issue.issue_id) }}
+{% elif notification_type == "ISSUE_COMMENT" %}
+{{ comment.commentedBy_username }} commented on '{{ subject }}' issue:
+{{ comment.comment_message}}
+{{ api.make_abs_url("/issue/" ~ issue.issue_id) }}
+{% elif notification_type == "ISSUE_RESOLVED" %}
+Issue {{ issue.issue_id }} closed for {{ subject }}
+{{ api.make_abs_url("/issue/" ~ issue.issue_id) }}
 {% endif %}
+{% if message %}
 
 {{ message }}
+{% endif %}
 
-{% if media.media_type == "movie" -%}
-{{ api.make_abs_url("/movie/{}".format(media.tmdbId)) }}
-{%- endif %}
+{% if request -%}
+  Requested by {{ request.requestedBy_username }}
+{% endif %}
+{% if media -%}
+  {{ api.make_abs_url("/"
+    ~ media.media_type ~ "/"
+    ~ media.tmdbId if media.media_type == "movie" else media.tvdbId) }}
+{% endif %}
