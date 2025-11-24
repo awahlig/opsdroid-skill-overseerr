@@ -222,8 +222,9 @@ class OverseerrSkill(Skill):
                            "is configured as target")
             return
 
+        loop = asyncio.get_running_loop()
         for room in rooms:
-            await send_notification(self.opsdroid, room, data)
+            loop.create_task(send_notification(self.opsdroid, room, data))
 
 
 class RoomContext:
@@ -232,6 +233,7 @@ class RoomContext:
         self.jinja = jinja
         self.api = api
         self.notify = notify
+        self.notify_lock = asyncio.Lock()
         self.user_context = {}
 
     def get_user_context(self, user_id):

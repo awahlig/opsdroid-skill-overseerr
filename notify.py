@@ -2,7 +2,7 @@ import logging
 
 from opsdroid.events import Message, Image
 
-from voluptuous import Schema, Any, Required, Url, MultipleInvalid
+from voluptuous import Schema, Any, Required, Url, ALLOW_EXTRA, MultipleInvalid
 
 
 NOTIFICATION_TYPE = Any(
@@ -54,7 +54,7 @@ NOTIFICATION_SCHEMA = Schema({
         Required("comment_message"): str,
         Required("commentedBy_username"): str,
     }),
-})
+}, extra=ALLOW_EXTRA)
 
 logger = logging.getLogger(__name__)
 
@@ -69,12 +69,13 @@ def validate_notification(data):
 
 
 async def send_notification(opsdroid, room, data):
-    if data["image"]:
-        await opsdroid.send(Image(
-            name=data["subject"],
-            url=data["image"],
-            target=room.name))
+    async with room.notify_lock:
+        if data["image"]:
+            await opsdroid.send(Image(
+                name=data["subject"],
+                url=data["image"],
+                target=room.name))
 
-    tmpl = room.jinja.get_template("notify.jinja")
-    text = await tmpl.render_async(data, api=room.api)
-    await opsdroid.send(Message(text, target=room.name))
+        tmpl = room.jinja.get_template("notify.jinja")
+        text = await tmpl.render_async(data, api=room.api)
+        await opsdroid.send(Message(text, target=room.name))
