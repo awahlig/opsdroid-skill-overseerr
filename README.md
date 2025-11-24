@@ -9,6 +9,7 @@ skills:
     # URL of this repository for Opsdroid to automatically download
     # the skill from.
     repo: https://github.com/awahlig/opsdroid-skill-overseerr.git
+    branch: main
 
     # Name of the bot.
     bot-name: opsdroid
@@ -22,4 +23,11 @@ skills:
       my-overseerr-room:
         # URL of the Overseerr API.
         url: https://my-overseerr.com
+
+        # Overseerr API key.
+        api-key: "..."
+
+        # Marks the room as a target for webhook notifications.
+        # <bot-url>/skill/overseerr/notification
+        notify: false
 ```

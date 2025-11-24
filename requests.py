@@ -14,7 +14,7 @@ async def requests_flow(message, context):
         kind = match[0]
     else:
         text = f"Sorry, '{kind}' does not uniquely identify a valid request type. " \
-                f"Request types are:\n{', '.join(valid)}"
+               f"Request types are:\n{', '.join(valid)}"
         await message.respond(Message(text))
         return
 
