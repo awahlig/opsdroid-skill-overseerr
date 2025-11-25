@@ -4,6 +4,8 @@ from opsdroid.events import Message, Image
 
 from voluptuous import Schema, Any, Required, Url, ALLOW_EXTRA, MultipleInvalid
 
+from .api import OverseerrError
+
 
 NOTIFICATION_TYPE = Any(
     "MEDIA_PENDING",
@@ -69,6 +71,19 @@ def validate_notification(data):
 
 
 async def send_notification(opsdroid, room, data):
+    media = data["media"]
+    if media:
+        try:
+            async with room.api.new_session() as session:
+                ratings = await session.get_ratings(
+                    media["media_type"],
+                    media["tmdbId"])
+        except OverseerrError:
+            logger.exception("Error retrieving ratings for %s", media)
+            ratings = {}
+    else:
+        ratings = {}
+
     async with room.notify_lock:
         if data["image"]:
             await opsdroid.send(Image(
@@ -77,5 +92,5 @@ async def send_notification(opsdroid, room, data):
                 target=room.name))
 
         tmpl = room.jinja.get_template("notify.jinja")
-        text = await tmpl.render_async(data, api=room.api)
+        text = await tmpl.render_async(data, api=room.api, ratings=ratings)
         await opsdroid.send(Message(text, target=room.name))

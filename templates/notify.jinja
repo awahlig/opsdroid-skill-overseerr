@@ -1,6 +1,6 @@
 {# _______________________________________ #}
 {% if notification_type == "MEDIA_PENDING" %}
-{{subject }} has been requested
+{{subject }} has been requested by {{ request.requestedBy_username }}
 Type "/r pending" here to approve, decline, or edit this request or go to {{ api.make_abs_url("/requests") }}
 {# __________________________________________ #}
 {% elif notification_type == "MEDIA_DECLINED" %}
@@ -34,18 +34,17 @@ Issue {{ issue.issue_id }} closed for {{ subject }}
 {# __________________________________________ #}
 {% set parts = [] %}
 {# __________________________________________ #}
-{% if request %}
-{% set _ = parts.append("Requested by " ~ request.requestedBy_username) %}
-{% endif %}
-{# __________________________________________ #}
-{% if media %}
-{% set ratings = api.new_session().get_ratings(media.media_type, media.tmdbId) %}
+{% if ratings %}
 {% set _ = parts.append("🍅 " ~ ratings.criticsScore ~ "%") %}
 {% set _ = parts.append("🍿 " ~ ratings.audienceScore ~ "%") %}
 {% endif %}
 {# __________________________________________ #}
+{% if request %}
+{% set _ = parts.append("👤 " ~ request.requestedBy_username) %}
+{% endif %}
+{# __________________________________________ #}
 {% if parts %}
-{{ parts | join(" • ") }}
+{{ parts | join("  ") }}
 {% endif %}
 {# __________________________________________ #}
 {% if media %}
