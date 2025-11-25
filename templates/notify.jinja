@@ -1,31 +1,53 @@
+{# _______________________________________ #}
 {% if notification_type == "MEDIA_PENDING" %}
 {{subject }} has been requested
 Type "/r pending" here to approve, decline, or edit this request or go to {{ api.make_abs_url("/requests") }}
-{% elif notification_type == "MEDIA_DECLINED" -%}
-  Request for {{ subject }} has been declined
-{% elif notification_type == "MEDIA_APPROVED" -%}
-  Request for {{ subject }} has been approved
-{% elif notification_type == "MEDIA_AVAILABLE" -%}
-  {{ subject }} is now ready to watch
+{# __________________________________________ #}
+{% elif notification_type == "MEDIA_DECLINED" %}
+Request for {{ subject }} has been declined
+{# __________________________________________ #}
+{% elif notification_type == "MEDIA_APPROVED" %}
+Request for {{ subject }} has been approved
+{# ___________________________________________ #}
+{% elif notification_type == "MEDIA_AVAILABLE" %}
+{{ subject }} is now ready to watch
+{# _____________________________________________________________ #}
 {% elif notification_type in ("ISSUE_CREATED", "ISSUE_REOPENED") %}
 Issue {{ issue.issue_id }} opened for {{ subject }} by {{ issue.reportedBy_username }}
 {{ api.make_abs_url("/issue/" ~ issue.issue_id) }}
+{# _________________________________________ #}
 {% elif notification_type == "ISSUE_COMMENT" %}
 {{ comment.commentedBy_username }} commented on '{{ subject }}' issue:
 {{ comment.comment_message}}
 {{ api.make_abs_url("/issue/" ~ issue.issue_id) }}
+{# __________________________________________ #}
 {% elif notification_type == "ISSUE_RESOLVED" %}
 Issue {{ issue.issue_id }} closed for {{ subject }}
 {{ api.make_abs_url("/issue/" ~ issue.issue_id) }}
 {% endif %}
+{# __________________________________________ #}
+
 {% if message %}
-
 {{ message }}
-{% endif %}
 
-{% if request -%}
-  Requested by {{ request.requestedBy_username }}
 {% endif %}
-{% if media -%}
-  {{ api.make_abs_url("/" ~ media.media_type ~ "/" ~ media.tmdbId) }}
+{# __________________________________________ #}
+{% set parts = [] %}
+{# __________________________________________ #}
+{% if request %}
+{% set _ = parts.append("Requested by " ~ request.requestedBy_username) %}
+{% endif %}
+{# __________________________________________ #}
+{% if media %}
+{% set ratings = api.new_session().get_ratings(media.media_type, media.tmdbId) %}
+{% set _ = parts.append("🍅 " ~ ratings.criticsScore ~ "%") %}
+{% set _ = parts.append("🍿 " ~ ratings.audienceScore ~ "%") %}
+{% endif %}
+{# __________________________________________ #}
+{% if parts %}
+{{ parts | join(" • ") }}
+{% endif %}
+{# __________________________________________ #}
+{% if media %}
+{{ api.make_abs_url("/" ~ media.media_type ~ "/" ~ media.tmdbId) }}
 {% endif %}
