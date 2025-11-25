@@ -13,20 +13,28 @@ STR_NONEMPTY = All(
 )
 
 CONFIG_SCHEMA = Schema({
+    # What's this bot called? Defaults to "opsdroid".
     Required("bot-name", default="opsdroid"): STR_NONEMPTY,
+
+    # The external URL of the Opsdroid web server.
+    # Used for Plex auth callbacks and notifications.
     Required("bot-url"): Url(),
-    Required("rooms", default={}): {
-        STR_NONEMPTY: All(
-            # For str, convert to dict first
-            lambda v: { "url": v } if isinstance(v, str) else v,
-            {
-                Required("url"): Url(),
-                Optional("more-rooms", default=[]): [STR_NONEMPTY],
-                Optional("api-key"): STR_NONEMPTY,
-                Optional("notify", default=False): Boolean(),
-            }
-        ),
-    },
+
+    # List of Overseerr servers.
+    Required("servers", default=[]): [{
+        # The URL of the server (without /api).
+        Required("url"): Url(),
+
+        # API key of the server. Optional.
+        Optional("api-key"): STR_NONEMPTY,
+
+        # List of rooms that can access this server.
+        Required("rooms"): [STR_NONEMPTY],
+
+        # List of rooms that receive webhook notifications. Optional.
+        # <bot-url>/skill/overseerr/notification
+        Optional("notify-rooms", default=[]): [STR_NONEMPTY],
+    }],
 }, extra=ALLOW_EXTRA)
 
 

@@ -78,19 +78,19 @@ class OverseerrSkill(Skill):
                          self.opsdroid.memory, self.jinja)
 
         self.rooms = {}
-        for name, room in config["rooms"].items():
-            self.configure_room(name, room)
+        for server in config["servers"]:
+            self.configure_server(server)
 
-    def configure_room(self, name, config):
-        url = config["url"]
-        api_key = config.get("api-key")
-        more_rooms = config["more-rooms"]
-        notify = config["notify"]
+    def configure_server(self, server):
+        url = server["url"]
+        api_key = server.get("api-key")
+        rooms = server["rooms"]
+        notify_rooms = frozenset(server["notify-rooms"])
 
         api = OverseerrAPI(url, api_key)
-        self.rooms[name] = RoomContext(name, self.jinja, api, notify)
 
-        for name in more_rooms:
+        for name in rooms:
+            notify = (name in notify_rooms)
             self.rooms[name] = RoomContext(name, self.jinja, api, notify)
 
     def get_user_context(self, event):
