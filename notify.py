@@ -40,7 +40,7 @@ NOTIFICATION_SCHEMA = Schema({
         Required("tvdbId"): str,
         Required("status"): MEDIA_STATUS,
     }),
-    Required("extra"): [Any()],
+    Required("extra"): list,
     Required("request"): Any(None, {
         Required("request_id"): str,
         Required("requestedBy_email"): str,
