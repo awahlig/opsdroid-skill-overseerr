@@ -63,8 +63,8 @@ def validate_notification(data):
     try:
         return NOTIFICATION_SCHEMA(data)
     except MultipleInvalid as error:
-        logger.info(f"Notification data: {data}")
-        logger.info(f"Error parsing notification data: {error}")
+        logger.debug("Notification data: %s", data)
+        logger.exception("Error parsing notification data")
         return None
 
 

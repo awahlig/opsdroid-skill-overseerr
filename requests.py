@@ -40,13 +40,9 @@ async def requests_flow(message, context):
 
             for index, result in enumerate(results, len(all_results) + 1):
                 result["index"] = index
-                media = result["media"]
-                if media["mediaType"] == "movie":
-                    result["info"] = await context.session.get_movie(media["tmdbId"])
-                elif media["mediaType"] == "tv":
-                    result["info"] = await context.session.get_tv(media["tmdbId"])
-                else:
-                    result["info"] = {}
+                result["info"] = await context.session.get_info(
+                    result["media"]["mediaType"],
+                    result["media"]["tmdbId"])
 
             all_results.extend(results)
             load_more = False

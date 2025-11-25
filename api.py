@@ -145,6 +145,10 @@ class OverseerrSession:
 
     ### Movies / TV
 
+    async def get_info(self, media_type, media_id, language=None):
+        query = dict(language=language)
+        return await self.get(f"/{media_type}/{media_id}", query)
+
     async def get_movie(self, movie_id, language=None):
         query = dict(language=language)
         return await self.get(f"/movie/{movie_id}", query)
@@ -152,6 +156,15 @@ class OverseerrSession:
     async def get_tv(self, tv_id, language=None):
         query = dict(language=language)
         return await self.get(f"/tv/{tv_id}", query)
+
+    async def get_ratings(self, media_type, media_id):
+        return await self.get(f"/{media_type}/{media_id}/ratings")
+
+    async def get_movie_ratings(self, movie_id):
+        return await self.get(f"/movie/{movie_id}/ratings")
+
+    async def get_tv_ratings(self, tv_id):
+        return await self.get(f"/tv/{tv_id}/ratings")
 
     ### Service
 
