@@ -1,9 +1,13 @@
+import logging
 import regex
 
 from opsdroid.events import Message, Typing, Image
 
-from .api import MediaStatus
+from .api import MediaStatus, OverseerrError
 from .utils import index_parser
+
+
+logger = logging.getLogger(__name__)
 
 
 async def search_flow(message, context):
@@ -72,8 +76,16 @@ async def search_flow(message, context):
         if command == "result":
             selected = argument
 
+            try:
+                ratings = await context.session.get_ratings(result["mediaType"],
+                                                            result["id"])
+            except OverseerrError:
+                logger.exception("Error retrieving ratings for %s", result)
+                ratings = {}
+
             tmpl = context.jinja.get_template("search/details.jinja")
-            text = await tmpl.render_async({}, result=selected, api=context.session.api)
+            text = await tmpl.render_async({}, result=selected, ratings=ratings,
+                                           api=context.session.api)
             await message.respond(Message(text))
 
             text = "Would you like to see the «cover» or «request» the media?"

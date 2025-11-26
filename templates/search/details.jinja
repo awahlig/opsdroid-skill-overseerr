@@ -3,5 +3,7 @@
 
 {{ result.overview }}
 
-Score: {{ result.voteAverage }} / 10 ({{ result.voteCount }} votes)
+{% if ratings %}
+🍅 {{ ratings.criticsScore }}%  🍿 {{ ratings.audienceScore }}%
+{% endif %}
 {{ api.make_abs_url("/{}/{}".format(result.mediaType, result.id)) }}
