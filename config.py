@@ -22,18 +22,24 @@ CONFIG_SCHEMA = Schema({
 
     # List of Overseerr servers.
     Required("servers", default=[]): [{
+
         # The URL of the server (without /api).
         Required("url"): Url(),
 
-        # API key of the server. Optional.
-        Optional("api-key"): STR_NONEMPTY,
+        # API key of the server.
+        Optional("api-key", default=""): STR_NONEMPTY,
 
-        # List of rooms that can access this server.
-        Required("rooms"): [STR_NONEMPTY],
+        # List of admins that access this server using the API key.
+        Optional("admins", default=[]): [STR_NONEMPTY],
 
-        # List of rooms that receive webhook notifications. Optional.
-        # <bot-url>/skill/overseerr/notification
-        Optional("notify-rooms", default=[]): [STR_NONEMPTY],
+        # List of users that can access this server by logging into
+        # their account using Plex.
+        Optional("users", default=[]): [STR_NONEMPTY],
+
+        # List of rooms where this server can be accessed.
+        # The participants will need to be in either "users" or "admins".
+        # These rooms also receive notifications.
+        Optional("rooms", default=[]): [STR_NONEMPTY],
     }],
 }, extra=ALLOW_EXTRA)
 

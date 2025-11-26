@@ -11,7 +11,7 @@ from opsdroid.matchers import (match_regex,
                                match_catchall,
                                match_webhook)
 
-from .config_schema import validate as validate_config
+from .config import validate as validate_config
 from .search import search_flow
 from .requests import requests_flow
 from .notify import validate_notification, send_notification
@@ -83,15 +83,21 @@ class OverseerrSkill(Skill):
 
     def configure_server(self, server):
         url = server["url"]
-        api_key = server.get("api-key")
-        rooms = server["rooms"]
-        notify_rooms = frozenset(server["notify-rooms"])
+        api_key = server["api-key"]
+        admins = frozenset(server["admins"])
+        users = frozenset(server["users"])
+        rooms = frozenset(server["rooms"])
 
-        api = OverseerrAPI(url, api_key)
+        user_api = OverseerrAPI(url)
+        admin_api = (OverseerrAPI(url, api_key) if api_key else user_api)
+
+        for name in (admins | users):
+            self.rooms[name] = RoomContext(name, self.jinja, admins, users,
+                                           admin_api, user_api)
 
         for name in rooms:
-            notify = (name in notify_rooms)
-            self.rooms[name] = RoomContext(name, self.jinja, api, notify)
+            self.rooms[name] = RoomContext(name, self.jinja, admins, users,
+                                           admin_api, user_api, notify=True)
 
     def get_user_context(self, event):
         room = self.rooms.get(event.target)
@@ -215,8 +221,7 @@ class OverseerrSkill(Skill):
         if not data:
             return
 
-        rooms = [context for context in self.rooms.values()
-                 if context.notify]
+        rooms = [room for room in self.rooms.values() if room.notify]
         if not rooms:
             logger.warning("received a notification but no room "
                            "is configured as target")
@@ -228,22 +233,34 @@ class OverseerrSkill(Skill):
 
 
 class RoomContext:
-    def __init__(self, name, jinja, api, notify):
+    def __init__(self, name, jinja, admins, users, admin_api, user_api,
+                 notify=False):
         self.name = name
         self.jinja = jinja
-        self.api = api
+        self.admins = admins
+        self.users = users
+        self.admin_api = admin_api
+        self.user_api = user_api
         self.notify = notify
         self.notify_lock = asyncio.Lock()
         self.user_context = {}
 
     def get_user_context(self, user_id):
         self.forget_old_user_contexts()
+
         try:
             return self.user_context[user_id]
         except KeyError:
-            context = UserContext(self, user_id)
-            self.user_context[user_id] = context
-            return context
+            pass
+
+        if user_id not in (self.admins | self.users):
+            return None  # unauthorized
+
+        api = (self.admin_api if user_id in self.admins
+               else self.user_api)
+        context = UserContext(self.jinja, api, user_id)
+        self.user_context[user_id] = context
+        return context
 
     def forget_old_user_contexts(self):
         for user_id, context in list(self.user_context.items()):
@@ -252,10 +269,10 @@ class RoomContext:
 
 
 class UserContext:
-    def __init__(self, room_context, user_id):
+    def __init__(self, jinja, api, user_id):
         self.user_id = user_id
-        self.jinja = room_context.jinja
-        self.api = room_context.api
+        self.jinja = jinja
+        self.api = api
         self.session = None
         self.mtime = 0
         self.task = None

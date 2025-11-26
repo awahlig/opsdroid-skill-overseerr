@@ -26,12 +26,18 @@ skills:
         # API key of the server. Optional.
         api-key: "..."
 
-        # List of Opsdroid rooms that can access this server.
-        rooms:
-          - my-overseerr-room
+        # List of admins that access this server using the API key.
+        admins:
+          - root
 
-        # List of rooms that receive webhook notifications. Optional.
-        # <bot-url>/skill/overseerr/notification
-        notify-rooms:
+        # List of users that can access this server by logging into
+        # their account using Plex.
+        users:
+          - john
+
+        # List of rooms where this server can be accessed.
+        # The participants will need to be in either "users" or "admins".
+        # These rooms also receive notifications.
+        rooms:
           - my-overseerr-room
 ```

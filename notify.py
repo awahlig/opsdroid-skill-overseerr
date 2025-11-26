@@ -71,10 +71,12 @@ def validate_notification(data):
 
 
 async def send_notification(opsdroid, room, data):
+    api = room.admin_api
+
     media = data["media"]
     if media:
         try:
-            async with room.api.new_session() as session:
+            async with api.new_session() as session:
                 ratings = await session.get_ratings(
                     media["media_type"],
                     media["tmdbId"])
@@ -92,5 +94,5 @@ async def send_notification(opsdroid, room, data):
                 target=room.name))
 
         tmpl = room.jinja.get_template("notify.jinja")
-        text = await tmpl.render_async(data, api=room.api, ratings=ratings)
+        text = await tmpl.render_async(data, api=api, ratings=ratings)
         await opsdroid.send(Message(text, target=room.name))
