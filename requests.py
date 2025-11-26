@@ -1,9 +1,13 @@
+import logging
 import regex
 
 from opsdroid.events import Message, Typing, Image
 
-from .api import MediaStatus
+from .api import MediaStatus, OverseerrError
 from .utils import index_parser
+
+
+logger = logging.getLogger(__name__)
 
 
 async def requests_flow(message, context):
@@ -92,13 +96,22 @@ async def requests_flow(message, context):
             # Refresh in case it's downloading and there's new data.
             update = await context.session.get_request(selected["id"])
             selected.update(update)
+            media = selected["media"]
+
+            try:
+                ratings = await context.session.get_ratings(media["mediaType"],
+                                                            media["tmdbId"])
+            except OverseerrError:
+                logger.exception("Error retrieving ratings for %s", media)
+                ratings = {}
 
             tmpl = context.jinja.get_template("requests/details.jinja")
-            text = await tmpl.render_async({}, result=selected, api=context.session.api)
+            text = await tmpl.render_async({}, result=selected, ratings=ratings,
+                                           api=context.session.api)
             await message.respond(Message(text))
 
             actions = ["see the «cover»"]
-            status = selected["media"]["status"]
+            status = media["status"]
             if status == MediaStatus.PENDING:
                 actions.extend(["«approve»", "«decline»"])
             actions.append("«retry»")

@@ -1,26 +1,33 @@
 {% import "helpers.jinja" as helpers %}
 {{ helpers.info_title(result.media.mediaType, result.info) }} —
 {%- if result.media.status == MediaStatus.PENDING %}
- Pending {{ "\u2753" }}
+ ⏸️ Pending
 {% elif result.media.status == MediaStatus.PROCESSING %}
 {% if result.media.downloadStatus %}
- Downloading {{ "\u2b07" }}
+ ⬇️ Downloading
 {% for download in result.media.downloadStatus %}
 {% set percentage = (download.size - download.sizeLeft) * 100 / download.size %}
 {{ "{:.1f}".format(percentage) }}% done{% if download.timeLeft %} ({{ download.timeLeft }} left){% endif +%}
 {% endfor %}
 {% else %}
- Requested {{ "\U0001f50d" }}
+ 👀 Requested
 {% endif %}
 {% elif result.media.status == MediaStatus.PARTIALLY_AVAILABLE %}
- Partially available {{ "\u274e" }}
+ ❎ Partially available
 {% elif result.media.status == MediaStatus.AVAILABLE %}
- Available {{ "\u2705" }}
+ ✅ Available
 {% else %}
- Unknown
+ ❓ Unknown
 {% endif %}
 
 {{ result.info.overview }}
 
-Added {{ format_time_ago(parse_time(result.createdAt)) }} by {{ result.requestedBy.displayName }}
+{% set parts = [] %}
+{% if ratings %}
+{% set _ = parts.append("🍅 " ~ ratings.criticsScore ~ "%") %}
+{% set _ = parts.append("🍿 " ~ ratings.audienceScore ~ "%") %}
+{% endif %}
+{% set _ = parts.append("👤 " ~ result.requestedBy.displayName) %}
+{% set _ = parts.append("🕗 " ~ format_time_ago(parse_time(result.createdAt))) %}
+{{ parts | join("  ") }}
 {{ api.make_abs_url("/{}/{}".format(result.media.mediaType, result.media.tmdbId)) }}
