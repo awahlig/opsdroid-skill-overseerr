@@ -10,7 +10,13 @@ Request for {{ subject }} has been declined
 Request for {{ subject }} has been approved
 {# ___________________________________________ #}
 {% elif notification_type == "MEDIA_AVAILABLE" %}
-{{ subject }} is now ready to watch
+{{ subject }}
+{%- set seasons = extra_map.get("Requested Seasons") %}
+{% if seasons | int(-1) > -1 %} season {{ seasons }} is
+{%- elif seasons %} seasons {{ seasons }} are
+{%- else %} is
+{%- endif %}
+ now ready to watch
 {# _____________________________________________________________ #}
 {% elif notification_type in ("ISSUE_CREATED", "ISSUE_REOPENED") %}
 Issue {{ issue.issue_id }} opened for {{ subject }} by {{ issue.reportedBy_username }}

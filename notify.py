@@ -42,7 +42,10 @@ NOTIFICATION_SCHEMA = Schema({
         Required("tvdbId"): str,
         Required("status"): MEDIA_STATUS,
     }),
-    Required("extra"): list,
+    Required("extra"): [{
+        Required("name"): str,
+        Required("value"): str,
+    }],
     Required("request"): Any(None, {
         Required("request_id"): str,
         Required("requestedBy_email"): str,
@@ -62,16 +65,20 @@ logger = logging.getLogger(__name__)
 
 
 def validate_notification(data):
+    logger.debug("Validating notification: %s", data)
+
     try:
         return NOTIFICATION_SCHEMA(data)
     except MultipleInvalid as error:
-        logger.debug("Notification data: %s", data)
         logger.exception("Error parsing notification data")
         return None
 
 
 async def send_notification(opsdroid, room, data):
     api = room.admin_api
+
+    extra_map = {item["name"]: item["value"]
+                 for item in data["extra"]}
 
     media = data["media"]
     if media:
@@ -94,5 +101,7 @@ async def send_notification(opsdroid, room, data):
                 target=room.name))
 
         tmpl = room.jinja.get_template("notify.jinja")
-        text = await tmpl.render_async(data, api=api, ratings=ratings)
+        text = await tmpl.render_async(data, api=api,
+                                       ratings=ratings,
+                                       extra_map=extra_map)
         await opsdroid.send(Message(text, target=room.name))
