@@ -40,8 +40,10 @@ Issue {{ issue.issue_id }} closed for {{ subject }}
 {# __________________________________________ #}
 {% set parts = [] %}
 {# __________________________________________ #}
-{% if ratings %}
+{% if ratings and ratings.criticsScore %}
 {% set _ = parts.append("🍅 " ~ ratings.criticsScore ~ "%") %}
+{% endif %}
+{% if ratings and ratings.audienceScore %}
 {% set _ = parts.append("🍿 " ~ ratings.audienceScore ~ "%") %}
 {% endif %}
 {# __________________________________________ #}
