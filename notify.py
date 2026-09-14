@@ -8,6 +8,7 @@ from .api import OverseerrError
 
 
 NOTIFICATION_TYPE = Any(
+    "TEST_NOTIFICATION",
     "MEDIA_PENDING",
     "MEDIA_DECLINED",
     "MEDIA_APPROVED",
