@@ -2,7 +2,8 @@ import logging
 
 from opsdroid.events import Message, Image
 
-from voluptuous import Schema, Any, Required, Url, ALLOW_EXTRA, MultipleInvalid
+from voluptuous import (Schema, Any, Optional, Required, Url,
+                        ALLOW_EXTRA, MultipleInvalid)
 
 from .api import OverseerrError
 
@@ -27,15 +28,19 @@ MEDIA_STATUS = Any(
     "AVAILABLE",
 )
 
-# https://docs.overseerr.dev/using-overseerr/notifications/webhooks#template-variables
-# As of 23.11.2025
+# https://docs.seerr.dev/using-seerr/notifications/webhook/#template-variables
+# As of 18.10.2026
 NOTIFICATION_SCHEMA = Schema({
+    # General
     Required("notification_type"): NOTIFICATION_TYPE,
+    Optional("event", default=""): str,
     Required("subject"): str,
     Required("message"): str,
     Required("image"): Any("", Url()),
+    # Notify User
     Required("email"): str,
     Required("username"): str,
+    # Special
     Required("media"): Any(None, {
         Required("media_type"): Any("movie", "tv"),
         Required("tmdbId"): str,
