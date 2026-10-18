@@ -55,6 +55,6 @@ Issue {{ issue.issue_id }} closed for {{ subject }}
 {{ parts | join("  ") }}
 {% endif %}
 {# __________________________________________ #}
-{% if media %}
-{{ api.make_abs_url("/" ~ media.media_type ~ "/" ~ media.tmdbId) }}
+{% if media_url %}
+{{ media_url }}
 {% endif %}

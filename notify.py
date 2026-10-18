@@ -1,4 +1,5 @@
 import logging
+import re
 
 from opsdroid.events import Message, Image
 
@@ -67,6 +68,9 @@ NOTIFICATION_SCHEMA = Schema({
     }),
 }, extra=ALLOW_EXTRA)
 
+# Placeholders in the "Link Template" extra item, e.g. <tmdbId>.
+LINK_PLACEHOLDER = re.compile(r"<(\w+)>")
+
 logger = logging.getLogger(__name__)
 
 
@@ -78,6 +82,18 @@ def validate_notification(data):
     except MultipleInvalid as error:
         logger.exception("Error parsing notification data")
         return None
+
+
+def make_media_url(api, media, extra_map):
+    # Links point to the server by default. A "Link Template" extra item,
+    # e.g. "https://example.com/title/movie/<tmdbId>", overrides this,
+    # with the placeholders filled in from the media fields.
+    template = extra_map.get("Link Template")
+    if not template:
+        return api.make_abs_url(f"/{media['media_type']}/{media['tmdbId']}")
+    return LINK_PLACEHOLDER.sub(
+        lambda match: media.get(match.group(1), match.group(0)),
+        template)
 
 
 async def send_notification(opsdroid, room, data):
@@ -96,8 +112,10 @@ async def send_notification(opsdroid, room, data):
         except OverseerrError:
             logger.exception("Error retrieving ratings for %s", media)
             ratings = {}
+        media_url = make_media_url(api, media, extra_map)
     else:
         ratings = {}
+        media_url = None
 
     async with room.notify_lock:
         if data["image"]:
@@ -109,5 +127,6 @@ async def send_notification(opsdroid, room, data):
         tmpl = room.jinja.get_template("notify.jinja")
         text = await tmpl.render_async(data, api=api,
                                        ratings=ratings,
+                                       media_url=media_url,
                                        extra_map=extra_map)
         await opsdroid.send(Message(text, target=room.name))
