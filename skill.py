@@ -83,7 +83,7 @@ class OverseerrSkill(Skill):
 
     def configure_server(self, server):
         url = server["url"]
-        api_key = server["api-key"]
+        api_key = server.get("api-key")
         admins = frozenset(server["admins"])
         users = frozenset(server["users"])
         rooms = frozenset(server["rooms"])
@@ -94,7 +94,7 @@ class OverseerrSkill(Skill):
         ratings_url = server.get("ratings-url")
         if ratings_url:
             ratings_api = OverseerrAPI(
-                ratings_url, server["ratings-api-key"] or api_key)
+                ratings_url, server.get("ratings-api-key") or api_key)
         else:
             ratings_api = admin_api
 
