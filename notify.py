@@ -101,7 +101,7 @@ async def send_notification(opsdroid, room, data):
     # Ratings may come from a different server than the room's own
     # (see the ratings-url server option); everything else -- media
     # links, template helpers -- keeps using the room's server API.
-    ratings_api = getattr(room, "ratings_api", api)
+    ratings_api = room.ratings_api
 
     extra_map = {item["name"]: item["value"]
                  for item in data["extra"]}

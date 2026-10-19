@@ -100,13 +100,12 @@ class OverseerrSkill(Skill):
 
         for name in (admins | users):
             self.rooms[name] = RoomContext(name, self.jinja, admins, users,
-                                           admin_api, user_api,
-                                           ratings_api=ratings_api)
+                                           admin_api, user_api, ratings_api)
 
         for name in rooms:
             self.rooms[name] = RoomContext(name, self.jinja, admins, users,
-                                           admin_api, user_api, notify=True,
-                                           ratings_api=ratings_api)
+                                           admin_api, user_api, ratings_api,
+                                           notify=True)
 
     def get_user_context(self, event):
         room = self.rooms.get(event.target)
@@ -243,15 +242,14 @@ class OverseerrSkill(Skill):
 
 class RoomContext:
     def __init__(self, name, jinja, admins, users, admin_api, user_api,
-                 notify=False, ratings_api=None):
+                 ratings_api, notify=False):
         self.name = name
         self.jinja = jinja
         self.admins = admins
         self.users = users
         self.admin_api = admin_api
         self.user_api = user_api
-        self.ratings_api = (ratings_api if ratings_api is not None
-                            else admin_api)
+        self.ratings_api = ratings_api
         self.notify = notify
         self.notify_lock = asyncio.Lock()
         self.user_context = {}
