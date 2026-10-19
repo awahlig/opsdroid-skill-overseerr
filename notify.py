@@ -98,6 +98,10 @@ def make_media_url(api, media, extra_map):
 
 async def send_notification(opsdroid, room, data):
     api = room.admin_api
+    # Ratings may come from a different server than the room's own
+    # (see the ratings-url server option); everything else -- media
+    # links, template helpers -- keeps using the room's server API.
+    ratings_api = getattr(room, "ratings_api", api)
 
     extra_map = {item["name"]: item["value"]
                  for item in data["extra"]}
@@ -105,7 +109,7 @@ async def send_notification(opsdroid, room, data):
     media = data["media"]
     if media:
         try:
-            async with api.new_session() as session:
+            async with ratings_api.new_session() as session:
                 ratings = await session.get_ratings(
                     media["media_type"],
                     media["tmdbId"])

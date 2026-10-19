@@ -26,6 +26,13 @@ skills:
         # API key of the server. Optional.
         api-key: "..."
 
+        # Optional: fetch notification ratings from a different API
+        # server (e.g. Rutter, which serves the same ratings endpoint
+        # while this server is a legacy instance). The ratings API key
+        # defaults to the server's api-key when unset.
+        ratings-url: https://my-rutter.app
+        ratings-api-key: "..."
+
         # List of admins that access this server using the API key.
         admins:
           - root
