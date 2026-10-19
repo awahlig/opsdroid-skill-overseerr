@@ -29,6 +29,14 @@ CONFIG_SCHEMA = Schema({
         # API key of the server.
         Optional("api-key", default=""): STR_NONEMPTY,
 
+        # Optional: fetch notification ratings from a different API
+        # server than this one -- e.g. Rutter, which serves the same
+        # /{media_type}/{tmdbId}/ratings endpoint under its own host
+        # and API key while this server is a legacy instance being
+        # migrated away from. Defaults to this server when unset.
+        Optional("ratings-url"): Url(),
+        Optional("ratings-api-key", default=""): STR_NONEMPTY,
+
         # List of admins that access this server using the API key.
         Optional("admins", default=[]): [STR_NONEMPTY],
 
