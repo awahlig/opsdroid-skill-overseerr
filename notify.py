@@ -133,4 +133,4 @@ async def send_notification(opsdroid, room, data):
                                        ratings=ratings,
                                        media_url=media_url,
                                        extra_map=extra_map)
-        await opsdroid.send(Message(text, target=room.name))
+        await opsdroid.send(Message(text.strip(), target=room.name))
