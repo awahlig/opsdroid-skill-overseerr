@@ -40,10 +40,11 @@ Issue {{ issue.issue_id }} closed for {{ subject }}
 {# __________________________________________ #}
 {% set parts = [] %}
 {# __________________________________________ #}
-{% if ratings and ratings.criticsScore %}
-{% set _ = parts.append("🍅 " ~ ratings.criticsScore ~ "%") %}
+{% if ratings.criticsScore is number %}
+{% set emoji = "🍅" if ratings.criticsScore >= 60 else "🤢" %}
+{% set _ = parts.append(emoji ~ " " ~ ratings.criticsScore ~ "%") %}
 {% endif %}
-{% if ratings and ratings.audienceScore %}
+{% if ratings.audienceScore is number %}
 {% set _ = parts.append("🍿 " ~ ratings.audienceScore ~ "%") %}
 {% endif %}
 {# __________________________________________ #}
