@@ -32,12 +32,6 @@ Issue {{ issue.issue_id }} closed for {{ subject }}
 {{ api.make_abs_url("/issue/" ~ issue.issue_id) }}
 {% endif %}
 {# __________________________________________ #}
-
-{% if message %}
-{{ message }}
-
-{% endif %}
-{# __________________________________________ #}
 {% set parts = [] %}
 {# __________________________________________ #}
 {% if ratings.criticsScore is number %}
@@ -56,6 +50,12 @@ Issue {{ issue.issue_id }} closed for {{ subject }}
 {{ parts | join("  ") }}
 {% endif %}
 {# __________________________________________ #}
+{% if message %}
+
+{{ message }}
+{% endif %}
+{# __________________________________________ #}
 {% if media_url %}
+
 {{ media_url }}
 {% endif %}
