@@ -46,6 +46,10 @@ Issue {{ issue.issue_id }} closed for {{ subject }}
 {% set _ = parts.append("👤 " ~ request.requestedBy_username) %}
 {% endif %}
 {# __________________________________________ #}
+{% if extra_map.get("Quality") %}
+{% set _ = parts.append("🎞️ " ~ extra_map.get("Quality")) %}
+{% endif %}
+{# __________________________________________ #}
 {% if parts %}
 {{ parts | join("  ") }}
 {% endif %}
