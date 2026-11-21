@@ -83,7 +83,7 @@ class OverseerrSkill(Skill):
 
     def configure_server(self, server):
         url = server["url"]
-        api_key = server["api-key"]
+        api_key = server.get("api-key")
         admins = frozenset(server["admins"])
         users = frozenset(server["users"])
         rooms = frozenset(server["rooms"])
@@ -91,13 +91,21 @@ class OverseerrSkill(Skill):
         user_api = OverseerrAPI(url)
         admin_api = (OverseerrAPI(url, api_key) if api_key else user_api)
 
+        ratings_url = server.get("ratings-url")
+        if ratings_url:
+            ratings_api = OverseerrAPI(
+                ratings_url, server.get("ratings-api-key") or api_key)
+        else:
+            ratings_api = admin_api
+
         for name in (admins | users):
             self.rooms[name] = RoomContext(name, self.jinja, admins, users,
-                                           admin_api, user_api)
+                                           admin_api, user_api, ratings_api)
 
         for name in rooms:
             self.rooms[name] = RoomContext(name, self.jinja, admins, users,
-                                           admin_api, user_api, notify=True)
+                                           admin_api, user_api, ratings_api,
+                                           notify=True)
 
     def get_user_context(self, event):
         room = self.rooms.get(event.target)
@@ -234,13 +242,14 @@ class OverseerrSkill(Skill):
 
 class RoomContext:
     def __init__(self, name, jinja, admins, users, admin_api, user_api,
-                 notify=False):
+                 ratings_api, notify=False):
         self.name = name
         self.jinja = jinja
         self.admins = admins
         self.users = users
         self.admin_api = admin_api
         self.user_api = user_api
+        self.ratings_api = ratings_api
         self.notify = notify
         self.notify_lock = asyncio.Lock()
         self.user_context = {}

@@ -77,10 +77,10 @@ async def search_flow(message, context):
             selected = argument
 
             try:
-                ratings = await context.session.get_ratings(result["mediaType"],
-                                                            result["id"])
+                ratings = await context.session.get_ratings(selected["mediaType"],
+                                                            selected["id"])
             except OverseerrError:
-                logger.exception("Error retrieving ratings for %s", result)
+                logger.exception("Error retrieving ratings for %s", selected)
                 ratings = {}
 
             tmpl = context.jinja.get_template("search/details.jinja")
@@ -123,7 +123,6 @@ async def request_flow(message, context, selected, params):
         folder = ""
 
     # Abort if media already requested.
-    print(selected)
     status = selected.get("mediaInfo", {}) \
                      .get("status", MediaStatus.UNKNOWN)
     if status in (MediaStatus.PENDING,
